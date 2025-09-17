@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <developers>
+        <developer>
+            <name>Graham Lynch</name>
+            <email>graham.lynch@gmail.com</email>
+            <url>https://github.com/glynch</url>
+        </developer>
+    </developers>
+
+    <parent>
+        <groupId>io.github.glynch.owcs</groupId>
+        <artifactId>owcs-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>io.github.glynch.owcs</groupId>
+    <artifactId>owcs-sso</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <okhttp3.version>4.12.0</okhttp3.version>
+        <jcache.version>1.0.0</jcache.version>
+        <junit.version>5.10.2</junit.version>
+        <logback.version>1.2.13</logback.version>
+        <jackson-annotations.version>2.8.0</jackson-annotations.version>
+        <owcs-test.version>0.1.0-SNAPSHOT</owcs-test.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.oracle.sites</groupId>
+            <artifactId>sites-sso-cas-impl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp3.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-annotations.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.cache</groupId>
+            <artifactId>cache-api</artifactId>
+            <version>${jcache.version}</version>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.glynch.owcs</groupId>
+            <artifactId>owcs-test</artifactId>
+            <version>${owcs-test.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Runtime -->
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>jcache</artifactId>
+            <version>${jcache.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+    </dependencies>
+</project>
