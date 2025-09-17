@@ -14,7 +14,7 @@ public class CachingTokenProvider implements TokenProvider {
     private final TokenProvider delegate;
     private final Cache<String, String> cache;
 
-    public CachingTokenProvider(Cache<String, String> cache, TokenProvider delegate) {
+    private CachingTokenProvider(Cache<String, String> cache, TokenProvider delegate) {
         this.delegate = delegate;
         this.cache = cache;
     }
@@ -41,9 +41,13 @@ public class CachingTokenProvider implements TokenProvider {
         return baseUrl + ":" + username;
     }
 
+    public static CachingTokenProvider create(Cache<String, String> cache, TokenProvider tokenProvider) {
+        return new CachingTokenProvider(cache, tokenProvider);
+    }
+
     public static CachingTokenProvider create(Cache<String, String> cache) {
         TokenProvider tokenProvider = TokenProvider.create();
-        return new CachingTokenProvider(cache, tokenProvider);
+        return create(cache, tokenProvider);
     }
 
     public static CachingTokenProvider create() {
