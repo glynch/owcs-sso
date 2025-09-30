@@ -23,6 +23,10 @@ public class DefaultTicketProvider implements TicketProvider {
         this.client = client;
     }
 
+    public DefaultTicketProvider() {
+        this(new OkHttpClient.Builder().build());
+    }
+
     @Override
     public String getTicket(String baseUrl, String service, String username, String password) throws SSOException {
         return requestTicket(baseUrl, service, username, password);

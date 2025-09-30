@@ -1,5 +1,7 @@
 package io.github.glynch.owcs.sso;
 
+import okhttp3.OkHttpClient;
+
 /*
  * This interface provides a contract for classes that provide tickets for CAS Single Sign-On (SSO) authentication.
  */
@@ -41,4 +43,9 @@ public interface TicketProvider {
      * @throws SSOException If an error occurs while retrieving the multi-ticket.
      */
     String getMultiTicket(String baseUrl, String username, String password) throws SSOException;
+
+    static TicketProvider create() {
+        OkHttpClient client = new OkHttpClient.Builder().build();
+        return new DefaultTicketProvider(client);
+    }
 }
