@@ -1,7 +1,5 @@
 package io.github.glynch.owcs.sso;
 
-import okhttp3.OkHttpClient;
-
 /*
  * This interface provides a contract for classes that provide tickets for CAS Single Sign-On (SSO) authentication.
  */
@@ -13,39 +11,36 @@ public interface TicketProvider {
      * Can be used only during some limited period of time for one resource and only
      * once
      * 
-     * @param baseUrl The base URL of the CAS server.
-     * 
      * @param service The service for which the ticket is requested.
      * 
-     * @param username The username of the user requesting the ticket.
+     * @param username The username for which the ticket is requested
      * 
-     * @param password The password of the user requesting the ticket.
+     * @param password The password for which the ticket is requested.
      * 
      * @return The ticket for the given service.
      * 
      * @throws SSOException If an error occurs while retrieving the ticket.
      */
-    String getTicket(String baseUrl, String service, String username, String password) throws SSOException;
+    String getTicket(String service, String username, String password) throws SSOException;
 
     /*
      * This method returns a multi-ticket for the given username.
      * 
      * Can be used only during some limited period, multiple times for any resource.
      * 
-     * @param baseUrl The base URL of the CAS server.
+     * @param username The username for which the ticket is requested
      * 
-     * @param username The username of the user requesting the ticket.
-     * 
-     * @param password The password of the user requesting the ticket.
-     * 
+     * @param password The password for which the ticket is requested.
+     *
      * @return The multi-ticket for the given username.
      * 
      * @throws SSOException If an error occurs while retrieving the multi-ticket.
      */
-    String getMultiTicket(String baseUrl, String username, String password) throws SSOException;
+    default String getMultiTicket(String username, String password) throws SSOException {
+        return getTicket("*", username, password);
+    }
 
-    static TicketProvider create() {
-        OkHttpClient client = new OkHttpClient.Builder().build();
-        return new DefaultTicketProvider(client);
+    static TicketProvider create(String casUrl) {
+        return new DefaultTicketProvider(new DefaultTicketGrantingTicketProvider(casUrl));
     }
 }

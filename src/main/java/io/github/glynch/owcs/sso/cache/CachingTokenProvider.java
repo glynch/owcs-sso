@@ -14,45 +14,50 @@ public class CachingTokenProvider implements TokenProvider {
     private final TokenProvider delegate;
     private final Cache<String, String> cache;
 
-    private CachingTokenProvider(Cache<String, String> cache, TokenProvider delegate) {
+    public CachingTokenProvider(Cache<String, String> cache, TokenProvider delegate) {
         this.delegate = delegate;
         this.cache = cache;
     }
 
     @Override
-    public String getToken(String baseUrl, String username, String password) throws SSOException {
-        String cacheKey = getCacheKey(baseUrl, username, password);
+    public String getToken(String service, String username, String password) throws SSOException {
+        String cacheKey = getCacheKey(service, username, password);
         String token = cache.get(cacheKey);
         if (token == null) {
-            LOGGER.trace("Cache miss for {} using username ({})", baseUrl, username);
-            token = delegate.getToken(baseUrl, username, password);
+            LOGGER.trace("Cache miss for {} using username ({})", service, username);
+            token = delegate.getToken(service, username, password);
             cache.put(cacheKey, token);
         } else {
-            LOGGER.trace("Cache hit for {} using username ({}): {}", baseUrl, username, token);
+            LOGGER.trace("Cache hit for {} using username ({}): {}", service, username, token);
         }
         return token;
+    }
+
+    @Override
+    public String getToken(String username, String password) throws SSOException {
+        return getToken("*", username, password);
     }
 
     public Cache<String, String> getCache() {
         return cache;
     }
 
-    private String getCacheKey(String baseUrl, String username, String password) {
-        return baseUrl + ":" + username;
+    private String getCacheKey(String service, String username, String password) {
+        return service + ":" + username;
     }
 
     public static CachingTokenProvider create(Cache<String, String> cache, TokenProvider tokenProvider) {
         return new CachingTokenProvider(cache, tokenProvider);
     }
 
-    public static CachingTokenProvider create(Cache<String, String> cache) {
-        TokenProvider tokenProvider = TokenProvider.create();
+    public static CachingTokenProvider create(Cache<String, String> cache, String casUrl) {
+        TokenProvider tokenProvider = TokenProvider.create(casUrl);
         return create(cache, tokenProvider);
     }
 
-    public static CachingTokenProvider create() {
+    public static CachingTokenProvider create(String casUrl) {
         Cache<String, String> cache = TokenCacheFactory.defaultTokenCache();
-        return create(cache);
+        return create(cache, casUrl);
     }
 
 }

@@ -14,7 +14,7 @@ import io.github.glynch.owcs.sso.cache.TokenCacheFactory;
 import io.github.glynch.owcs.test.containers.JSKContainer;
 
 @TestInstance(Lifecycle.PER_CLASS)
-public class TestTokenProvider {
+class TestTokenProvider {
 
     private JSKContainer jskContainer;
     private TokenProvider tokenProvider;
@@ -23,20 +23,21 @@ public class TestTokenProvider {
     void beforeAll() {
         jskContainer = new JSKContainer("grahamlynch/jsk:12.2.1.3.0-samples");
         jskContainer.start();
-        tokenProvider = TokenProvider.create();
+        tokenProvider = TokenProvider.create(jskContainer.getCasUrl());
     }
 
     @Test
     void testToken() {
-        String token = tokenProvider.getToken(jskContainer.getBaseUrl(), "fwadmin", "xceladmin");
+        String token = tokenProvider.getToken("*", "fwadmin", "xceladmin");
         assertNotNull(token);
     }
 
     @Test
     void testCachedToken() {
-        CachingTokenProvider cachingTokenProvider = CachingTokenProvider.create(TokenCacheFactory.defaultTokenCache());
-        String token = cachingTokenProvider.getToken(jskContainer.getBaseUrl(), "fwadmin", "xceladmin");
-        String cachedToken = cachingTokenProvider.getToken(jskContainer.getBaseUrl(), "fwadmin", "xceladmin");
+        CachingTokenProvider cachingTokenProvider = CachingTokenProvider.create(TokenCacheFactory.defaultTokenCache(),
+                jskContainer.getCasUrl());
+        String token = cachingTokenProvider.getToken("*", "fwadmin", "xceladmin");
+        String cachedToken = cachingTokenProvider.getToken("*", "fwadmin", "xceladmin");
         assertEquals(token, cachedToken);
     }
 

@@ -7,17 +7,24 @@ public class DefaultTokenProvider implements TokenProvider {
     private final TicketProvider ticketProvider;
     private final TicketEncryptor ticketEncryptor;
 
-    public DefaultTokenProvider(TicketProvider ticketProvider, TicketEncryptor ticketEncryptor) {
+    DefaultTokenProvider(TicketProvider ticketProvider, TicketEncryptor ticketEncryptor) {
         this.ticketProvider = ticketProvider;
         this.ticketEncryptor = ticketEncryptor;
     }
 
     @Override
-    public String getToken(String baseUrl, String username, String password) throws SSOException {
-        Objects.requireNonNull(baseUrl, "baseUrl");
+    public String getToken(String service, String username, String password) throws SSOException {
+        Objects.requireNonNull(service, "service cannot be empty or null");
         Objects.requireNonNull(username, "username");
         Objects.requireNonNull(password, "password");
-        return ticketEncryptor.encrypt(baseUrl, ticketProvider.getMultiTicket(baseUrl, username, password));
+        return ticketEncryptor.encrypt(ticketProvider.getTicket(service, username, password));
+    }
+
+    @Override
+    public String getToken(String username, String password) throws SSOException {
+        Objects.requireNonNull(username, "username");
+        Objects.requireNonNull(password, "password");
+        return ticketEncryptor.encrypt(ticketProvider.getMultiTicket(username, password));
     }
 
 }

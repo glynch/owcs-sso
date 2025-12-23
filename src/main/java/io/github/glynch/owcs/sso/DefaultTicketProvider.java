@@ -1,77 +1,47 @@
 package io.github.glynch.owcs.sso;
 
-import java.io.IOException;
-import java.util.Objects;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
-import okhttp3.Call;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+public class DefaultTicketProvider extends ProviderSupport implements TicketProvider {
 
-public class DefaultTicketProvider implements TicketProvider {
+    private final TicketGrantingTicketProvider ticketGrantingTicketProvider;
 
-    private static final String USERNAME_PARAM = "username";
-    private static final String PAGENAME_PARAM = "pagename";
-    private static final String PASSWORD_PARAM = "password";
-    private static final String ACTION_PARAM = "action";
-    private static final String SERVICE_PARAM = "service";
-    private static final String PAGENAME = "fatwire/wem/sso/processticket";
-    private final OkHttpClient client;
-
-    public DefaultTicketProvider(OkHttpClient client) {
-        this.client = client;
-    }
-
-    public DefaultTicketProvider() {
-        this(new OkHttpClient.Builder().build());
+    public DefaultTicketProvider(TicketGrantingTicketProvider ticketGrantingTicketProvider) {
+        this.ticketGrantingTicketProvider = ticketGrantingTicketProvider;
     }
 
     @Override
-    public String getTicket(String baseUrl, String service, String username, String password) throws SSOException {
-        return requestTicket(baseUrl, service, username, password);
+    public String getTicket(String service, String username, String password) throws SSOException {
+        return getServiceTicket(ticketGrantingTicketProvider.getTicketGrantingTicket(username, password), service);
     }
 
-    @Override
-    public String getMultiTicket(String baseUrl, String username, String password) throws SSOException {
-        return requestTicket(baseUrl, "*", username, password);
-    }
+    private String getServiceTicket(String tgt, String service) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("service", service);
 
-    private String requestTicket(String baseUrl, String service, String username, String password) throws SSOException {
-        Objects.requireNonNull(baseUrl, "baseUrl is required");
-        Objects.requireNonNull(service, "service is required");
-        Objects.requireNonNull(username, "username is required");
-        Objects.requireNonNull(password, "password is required");
-        FormBody formBody = new FormBody.Builder()
-                .add(PAGENAME_PARAM, PAGENAME)
-                .add(USERNAME_PARAM, username)
-                .add(PASSWORD_PARAM, password)
-                .add(ACTION_PARAM, "ticket")
-                .add(SERVICE_PARAM, service).build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        Request request = new Request.Builder()
-                .url(baseUrl + "/Satellite")
-                .header("PRAGMA", "auth-redirect=false")
-                .post(formBody)
-                .build();
-
-        Call call = client.newCall(request);
-        String ticket = null;
-        try (Response response = call.execute()) {
-            String body = response.body().string().trim();
-            if (!response.isSuccessful()) {
-                throw new SSOException(
-                        String.format("Failed to get ticket for service (%s): %d", service, response.code()));
-            } else if (body.length() == 0) {
-                // WebCenter Sites returns 200 OK with empty body when authentication fails
-                throw new SSOException("Failed to get ticket: 0 byte response. Please check username and password.");
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(formData, headers);
+        String serviceTicket = null;
+        try {
+            ResponseEntity<String> response = getRestTemplate().postForEntity(tgt, requestEntity, String.class);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                serviceTicket = response.getBody().trim();
             }
-            ticket = body;
-        } catch (IOException e) {
-            throw new SSOException("Failed to get ticket", e);
+        } catch (Exception e) {
+            throw new SSOException("Error getting ticket granting ticket", e);
         }
-        return ticket;
-
+        if (service.equals("*")) {
+            serviceTicket = "multi-" + serviceTicket;
+        }
+        return serviceTicket;
     }
 
 }
