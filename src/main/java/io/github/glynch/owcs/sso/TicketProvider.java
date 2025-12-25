@@ -21,10 +21,10 @@ public interface TicketProvider {
      * 
      * @throws SSOException If an error occurs while retrieving the ticket.
      */
-    String getTicket(String service, String username, String password) throws SSOException;
+    String getTicket(String service, String username, String password) throws TicketProviderException;
 
     /*
-     * This method returns a multi-ticket for the given username.
+     * This method returns a multi-ticket for the given username/password.
      * 
      * Can be used only during some limited period, multiple times for any resource.
      * 
@@ -36,11 +36,16 @@ public interface TicketProvider {
      * 
      * @throws SSOException If an error occurs while retrieving the multi-ticket.
      */
-    default String getMultiTicket(String username, String password) throws SSOException {
+    default String getMultiTicket(String username, String password) throws TicketProviderException {
         return getTicket("*", username, password);
     }
 
-    static TicketProvider create(String casUrl) {
-        return new DefaultTicketProvider(new DefaultTicketGrantingTicketProvider(casUrl));
+    static TicketProvider create(TicketGrantingTicketProvider ticketGrantingTicketProvider) {
+        return new DefaultTicketProvider(ticketGrantingTicketProvider);
     }
+
+    static TicketProvider create(String casUrl) {
+        return create(TicketGrantingTicketProvider.create(casUrl));
+    }
+
 }

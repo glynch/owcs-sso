@@ -13,6 +13,7 @@ public class NoClassNameToStringStyle extends ToStringStyle {
         setNullText("");
         setContentStart("{");
         setContentEnd("}");
+
     }
 
 }

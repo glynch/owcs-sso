@@ -10,6 +10,7 @@ import org.springframework.util.MultiValueMap;
 
 public class DefaultTicketProvider extends ProviderSupport implements TicketProvider {
 
+    private static final String SERVICE2 = "service";
     private final TicketGrantingTicketProvider ticketGrantingTicketProvider;
 
     public DefaultTicketProvider(TicketGrantingTicketProvider ticketGrantingTicketProvider) {
@@ -17,13 +18,13 @@ public class DefaultTicketProvider extends ProviderSupport implements TicketProv
     }
 
     @Override
-    public String getTicket(String service, String username, String password) throws SSOException {
+    public String getTicket(String service, String username, String password) throws TicketProviderException {
         return getServiceTicket(ticketGrantingTicketProvider.getTicketGrantingTicket(username, password), service);
     }
 
     private String getServiceTicket(String tgt, String service) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("service", service);
+        formData.add(SERVICE2, service);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -36,7 +37,7 @@ public class DefaultTicketProvider extends ProviderSupport implements TicketProv
                 serviceTicket = response.getBody().trim();
             }
         } catch (Exception e) {
-            throw new SSOException("Error getting ticket granting ticket", e);
+            throw new TicketProviderException(service, tgt, e);
         }
         if (service.equals("*")) {
             serviceTicket = "multi-" + serviceTicket;

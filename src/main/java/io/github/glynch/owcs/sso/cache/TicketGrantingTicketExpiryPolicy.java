@@ -7,19 +7,19 @@ import javax.cache.expiry.ExpiryPolicy;
 
 public class TicketGrantingTicketExpiryPolicy implements ExpiryPolicy {
 
-  private static final Duration DEFAULT_EXPIRY_FOR_CREATION = new Duration(TimeUnit.HOURS, 8);
-  private static final Duration DEFAULT_EXPIRY_FOR_ACCESS = new Duration(TimeUnit.HOURS, 2);
+  public static final long DEFAULT_TIME_TO_LIVE_SECONDS = 28800; // 8 hours
+  public static final long DEFAULT_TIME_TO_IDLE_SECONDS = 7200; // 2 hours
 
   private final Duration expiryForCreation;
   private final Duration expiryForAccess;
 
-  public TicketGrantingTicketExpiryPolicy(Duration expiryForCreation, Duration expiryForAccess) {
-    this.expiryForCreation = expiryForCreation;
-    this.expiryForAccess = expiryForAccess;
+  public TicketGrantingTicketExpiryPolicy(long timeToLiveSeconds, long timeToIdleSeconds) {
+    this.expiryForCreation = new Duration(TimeUnit.SECONDS, timeToLiveSeconds);
+    this.expiryForAccess = new Duration(TimeUnit.SECONDS, timeToIdleSeconds);
   }
 
   public TicketGrantingTicketExpiryPolicy() {
-    this(DEFAULT_EXPIRY_FOR_CREATION, DEFAULT_EXPIRY_FOR_ACCESS);
+    this(DEFAULT_TIME_TO_LIVE_SECONDS, DEFAULT_TIME_TO_IDLE_SECONDS);
   }
 
   @Override

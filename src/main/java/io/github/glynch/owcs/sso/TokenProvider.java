@@ -1,9 +1,5 @@
 package io.github.glynch.owcs.sso;
 
-import javax.cache.Cache;
-
-import io.github.glynch.owcs.sso.cache.CachingTokenProvider;
-
 /**
  * 
  * 
@@ -22,22 +18,21 @@ public interface TokenProvider {
      * @return the encrypted token to use when authenticating {@value X_CSRF_TOKEN}
      * @throws SSOException
      */
-    String getToken(String service, String username, String password) throws SSOException;
+    String getToken(String service, String username, String password) throws TokenProviderException;
 
-    String getToken(String username, String password) throws SSOException;
+    String getToken(String username, String password) throws TokenProviderException;
 
-    static TokenProvider create(String casUrl) {
-        return new DefaultTokenProvider(new DefaultTicketProvider(new DefaultTicketGrantingTicketProvider(casUrl)),
-                new DefaultTicketEncryptor());
+    static TokenProvider create(TicketProvider ticketProvider, TicketEncryptor ticketEncryptor) {
+        return new DefaultTokenProvider(ticketProvider, ticketEncryptor);
     }
 
-    static CachingTokenProvider create(String casUrl, Cache<String, String> cache) {
+    static TokenProvider create(TicketProvider ticketProvider) {
+        return create(ticketProvider,
+                TicketEncryptor.create());
+    }
 
-        TokenProvider delegate = new DefaultTokenProvider(
-                new DefaultTicketProvider(new DefaultTicketGrantingTicketProvider(casUrl)),
-                new DefaultTicketEncryptor());
-
-        return new CachingTokenProvider(cache, delegate);
+    static TokenProvider create(String casUrl) {
+        return create(TicketProvider.create(casUrl));
     }
 
 }

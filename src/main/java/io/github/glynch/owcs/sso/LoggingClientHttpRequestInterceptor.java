@@ -23,7 +23,7 @@ public class LoggingClientHttpRequestInterceptor implements ClientHttpRequestInt
         LOGGER.debug("Request URI: {}", request.getURI());
         LOGGER.debug("Request Method: {}", request.getMethod());
         LOGGER.debug("Request Headers: {}", request.getHeaders());
-        LOGGER.trace("Request Body: {}", new String(body, StandardCharsets.UTF_8));
+        LOGGER.trace("Request Body: {}", body != null ? new String(body, StandardCharsets.UTF_8) : "");
         ClientHttpResponse response = execution.execute(request, body);
         if (LOGGER.isTraceEnabled()) {
             try (BufferedReader reader = new BufferedReader(
