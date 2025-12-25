@@ -8,6 +8,7 @@ import javax.cache.configuration.MutableConfiguration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import io.github.glynch.owcs.sso.SSOException;
 import io.github.glynch.owcs.sso.TicketGrantingTicketProvider;
@@ -41,6 +42,7 @@ public class CachingTicketGrantingTicketProvider implements TicketGrantingTicket
 
     public static CachingTicketGrantingTicketProvider create(TicketGrantingTicketProvider ticketGrantingTicketProvider,
             long timeToLiveSeconds, long timeToIdleSeconds) {
+        Assert.isTrue(timeToLiveSeconds > timeToIdleSeconds, "timeToLiveSeconds must be > timeToIdleSeconds");
         return new CachingTicketGrantingTicketProvider(ticketGrantingTicketProvider, timeToLiveSeconds,
                 timeToIdleSeconds);
     }

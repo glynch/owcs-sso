@@ -15,6 +15,10 @@ See [Using REST Resources with the WEM Framework](https://docs.oracle.com/en/mid
 
 ## Pre Requisites
 
+The following dependencies need to be installed before this project can be built.
+
+See each project for installation information.
+
 [owcs-parent](https://github.com/glynch/owcs-parent)
 
 [owcs-test](https://github.com/glynch/owcs-test)
@@ -24,4 +28,50 @@ See [Using REST Resources with the WEM Framework](https://docs.oracle.com/en/mid
 ```bash
     ./mvnw clean install
 ```
+
+## Usage
+
+### Get a Ticket Granting Ticket (TGT)
+
+- `timeToLiveSeconds` is the maximum time that the TGT can be used before it expires.
+- `timeToIdleSeconds` is the maximum time that the TGT will remain in the cache without being used.
+
+```java
+    TicketGrantingTicketProvider ticketGrantingTicketProvideer = CachingTicketGrantingTicketProvider.create("http://localhost:7003/cas");
+    String tgt = ticketGrantingTicketProvider.getTicketGrantingTicket("fwadmin", "xceladmin");
+```
+
+> Using the CachingTicketGrantingTicketProvider will cache the TGT so it can be re-used. The default `timeToLiveSeconds` is 8 hours and the `timeToIdleSeconds` is 2 hours. 
+ 
+
+### Get a Service Ticket (ST)
+
+Service tickets are single use and expire after they are used. 
+
+```java
+    TicketProvider ticketProvider = TickerProvider.create("http://localhost:7003/cas");
+    String st = ticketProvider.getTicket("http://localhost:7003/sites/REST/sites", "fwadmin", "xceladmin");
+```
+
+### Get a Multi Ticket (multi)
+
+```java
+    TicketProvider ticketProvider = TickerProvider.create("http://localhost:7003/cas");
+    String multiTicket = ticketProvider.getMultiTicket("fwadmin", "xceladmin");
+```
+
+### Get an Encrypted Token 
+
+This token can be used as the `X-CSRF_TOKEN` header for request to autneticated REST resources.
+
+- `timeToLiveSeconds` is the maximum time that the token can be used before it expires.
+
+```java
+    TokenProvider tokenProvider = CachingTokenProvider.create("http://localhost:7003/cas");
+    String token = tokenProvider.getToken("fwadmin", "xceladmin");
+```
+
+> The `timeToIdleSeconds` defaults to 900 seconds which is the default `cs.timeout`
+
+
 
