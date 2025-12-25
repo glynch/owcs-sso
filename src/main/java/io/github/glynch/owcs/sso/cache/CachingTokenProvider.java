@@ -17,13 +17,13 @@ import io.github.glynch.owcs.sso.TokenProvider;
 public class CachingTokenProvider implements TokenProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CachingTokenProvider.class);;
-    private static final String CACHE_NAME = "tokens";
+    private static final String CACHE_NAME_PREFIX = "tokens-";
     private final TokenProvider delegate;
     private final Cache<TokenCacheKey, String> cache;
 
     public CachingTokenProvider(TokenProvider delegate) {
         this.delegate = delegate;
-        this.cache = CacheFactory.getOrCreateCache(CACHE_NAME + "-" + UUID.randomUUID().toString(),
+        this.cache = CacheFactory.getOrCreateCache(CACHE_NAME_PREFIX + UUID.randomUUID().toString(),
                 getConfiguration(delegate, TokenExpiryPolicy.DEFAULT_TIME_TO_LIVE_SECONDS));
     }
 
